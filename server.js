@@ -1,10 +1,10 @@
 const express = require('express');
 const app = express();
 const Message = require('./db/Message').Message;
+const Users = require('./db/Users');
 const db = require('./db/Message');
 const bodyparser = require('body-parser');
 app.use(bodyparser.json());
-
 
 //create
 app.post('/messages', (req,res, next) => {
@@ -35,6 +35,39 @@ app.delete('/messages/:number', (req,res,next) => {
     .then(() => res.sendStatus(202))
 })
 
+//create new user
+app.post('/user', (req, res, next) => {
+  const newUser = new Users ( req.body )
+   newUser.save()
+   .then(() => res.send("new user created!"));
+})
+
+//get all users
+app.get('/user', (req, res, next) => {
+  Users.find()
+  .then((results) => res.send(results))
+})
+
+//get one users
+app.get('/user/:id', (req, res, next) => {
+  Users.find({ _id : req.params.id})
+  .then((results) => res.send(results))
+})
+
+//update user
+app.put('/user/:id', (req, res, next) => {
+  Users.findByIdAndUpdate({ _id : req.params.id }, req.body)
+    .then((results) => res.send('user updated'))
+})
+//delete user
+app.delete('/user/:id', (req, res, next) => {
+  Users.remove({ _id: req.params.id })
+  //  .then( Users.save())
+   .then(() => res.sendStatus(202))
+})
+
+
+//catch route if any of above routes fail
 app.use((req,res,next) => {
   res.status(404).send('That route does not exist');
 });
@@ -50,7 +83,6 @@ module.exports = app;
 
 
 //update by name && message (picks the first message to update, doesnt find correct message)
-
 // app.put('/messages/:name/:message/', (req, res, next) => {
 //   var query = { name : req.params.name,
 //                 message: req.params.message }
